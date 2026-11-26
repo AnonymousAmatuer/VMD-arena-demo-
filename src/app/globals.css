@@ -4637,6 +4637,192 @@ tbody tr:last-child td {
   margin-top: 8px;
 }
 
+.control-onboarding .modal-close {
+  display: none;
+}
+.control-onboarding .control-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+.control-choice-grid button {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 13px;
+  text-align: left;
+  padding: 14px;
+}
+.control-choice-grid button span {
+  display: grid;
+  gap: 4px;
+}
+.control-choice-grid button b {
+  font: 700 19px var(--display);
+}
+.control-choice-grid button small {
+  font: 500 8px var(--mono);
+  opacity: 0.8;
+}
+
+.touch-joystick {
+  position: relative;
+  width: clamp(104px, 29vw, 146px);
+  height: clamp(104px, 29vw, 146px);
+  flex: 0 0 auto;
+  border: 1px solid #b2c7ba70;
+  border-radius: 50%;
+  background: radial-gradient(circle, #24352fbd, #15201f9e 68%, #0c1415b8);
+  box-shadow: inset 0 0 20px #05090999, 0 5px 22px #0005;
+  touch-action: none;
+  user-select: none;
+  pointer-events: auto;
+}
+.touch-joystick::before,
+.touch-joystick::after {
+  content: "";
+  position: absolute;
+  background: #b2c7ba25;
+  pointer-events: none;
+}
+.touch-joystick::before {
+  width: 1px;
+  top: 12%;
+  bottom: 12%;
+  left: 50%;
+}
+.touch-joystick::after {
+  height: 1px;
+  left: 12%;
+  right: 12%;
+  top: 50%;
+}
+.touch-joystick > i {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 50%;
+  width: 40%;
+  height: 40%;
+  border: 1px solid #d6e6ddc4;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #7ba58b, #304f40 72%);
+  box-shadow: 0 4px 13px #0008, inset 0 1px #d4e5dc73;
+  pointer-events: none;
+  margin: -20% 0 0 -20%;
+}
+
+.battle-screen[data-controls="mobile"] .arena-toolbar .system-toggle,
+.battle-screen[data-controls="mobile"] .arena-toolbar .following,
+.battle-screen[data-controls="mobile"] .desktop-hint,
+.battle-screen[data-controls="mobile"] .drive-pad,
+.battle-screen[data-controls="mobile"] .battle-instruments > span:not(.speed-readout),
+.battle-screen[data-controls="mobile"] .fire-pad > .dark-button[title^="Sound horn"] {
+  display: none;
+}
+.battle-screen[data-controls="mobile"] .battle-topline {
+  height: 34px;
+  padding-inline: 12px;
+}
+.battle-screen[data-controls="mobile"] .battle-topline > .eyebrow {
+  display: none;
+}
+.battle-screen[data-controls="mobile"] .battle-topline > span:nth-child(2) {
+  font-size: 8px;
+}
+.battle-screen[data-controls="mobile"] .arena-toolbar {
+  margin-left: auto;
+}
+.battle-screen[data-controls="mobile"] .arena-toolbar > button:not(:last-child) {
+  display: none;
+}
+.battle-screen[data-controls="mobile"] .arena-toolbar > button:last-child {
+  width: 36px;
+  height: 34px;
+}
+.battle-screen[data-controls="mobile"] .battle-scores {
+  top: 42px;
+  width: calc(100% - 20px);
+  gap: 4px;
+}
+.battle-screen[data-controls="mobile"] .fighter-score {
+  gap: 5px;
+  padding: 5px 7px;
+  min-height: 48px;
+}
+.battle-screen[data-controls="mobile"] .fighter-score img {
+  display: none;
+}
+.battle-screen[data-controls="mobile"] .fighter-score small {
+  font-size: 6px;
+}
+.battle-screen[data-controls="mobile"] .fighter-score h3 {
+  font-size: 13px;
+  margin: 1px 0 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.battle-screen[data-controls="mobile"] .hp-track {
+  height: 3px;
+}
+.battle-screen[data-controls="mobile"] .fighter-score > div > span {
+  display: none;
+}
+.battle-screen[data-controls="mobile"] .round-timer {
+  padding: 5px 7px;
+}
+.battle-screen[data-controls="mobile"] .round-timer small {
+  font-size: 5px;
+}
+.battle-screen[data-controls="mobile"] .round-timer strong {
+  font-size: 18px;
+}
+.battle-screen[data-controls="mobile"] .battle-instruments {
+  bottom: 16px;
+  left: 50%;
+  padding: 4px 7px;
+  opacity: 0.78;
+}
+.battle-screen[data-controls="mobile"] .battle-instruments > .speed-readout {
+  font-size: 7px;
+}
+.battle-screen[data-controls="mobile"] .battle-instruments > .speed-readout svg {
+  width: 11px;
+}
+.battle-screen[data-controls="mobile"] .speed-readout strong {
+  font-size: 10px;
+}
+.battle-screen[data-controls="mobile"] .arena-announcer {
+  display: none;
+}
+.battle-screen[data-controls="mobile"] .battle-bottom {
+  min-height: 0;
+  padding: 12px 14px max(14px, env(safe-area-inset-bottom));
+  align-items: flex-end;
+  gap: 8px;
+  background: linear-gradient(0deg, #111a1ea6, transparent 80%);
+  border: 0;
+  pointer-events: none;
+}
+.battle-screen[data-controls="mobile"] .fire-pad {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  pointer-events: auto;
+}
+.battle-screen[data-controls="mobile"] .fire-pad button {
+  min-height: 48px;
+  min-width: 92px;
+  padding: 8px 12px;
+  font-size: 11px;
+}
+.battle-screen[data-controls="mobile"] .fire-pad .primary {
+  font-size: 12px;
+}
+
 /* Driving HUD and camera. Buttons illuminate for keyboard and pointer inputs. */
 .battle-screen:focus {
   outline: none;

@@ -1,5 +1,6 @@
 "use client";
 import type { Livery, RivalMemory } from "@/game/data";
+import type { ControlMode } from "@/game/controls";
 import { useEffect, useRef, useState } from "react";
 import * as T from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -21,6 +22,8 @@ import {
   Zap,
   Keyboard,
   ChevronLeft,
+  Smartphone,
+  Monitor,
 } from "lucide-react";
 import {
   ArenaSimulation,
@@ -65,6 +68,8 @@ interface Props {
   level: number;
   engineer: string;
   settings: Settings;
+  controlMode: ControlMode;
+  onControlModeChange: (mode: ControlMode) => void;
   onFinish: (o: Outcome) => void;
   onExit: () => void;
 }
@@ -164,6 +169,9 @@ export default function BattleArena(props: Props) {
       "You’re driving the orange buggy. Hold W or ↑ to accelerate.",
     );
   const systemsRef = useRef(systems);
+  const touchDrive = useRef({ gas: 0, steer: 0 });
+  const joystickPointer = useRef<number | null>(null);
+  const joystickNub = useRef<HTMLElement>(null);
   const rival = opponent(props.level);
   const [phase, setPhase] = useState<MatchPhase>(
     props.settings.cinematic ? "intro" : "countdown",
@@ -179,6 +187,10 @@ export default function BattleArena(props: Props) {
     presses.current.clear();
     pulses.current.clear();
     keyPressAt.current.clear();
+    touchDrive.current = { gas: 0, steer: 0 };
+    joystickPointer.current = null;
+    if (joystickNub.current)
+      joystickNub.current.style.transform = "translate(0px, 0px)";
   }
   function focusBattle() {
     root.current?.focus({ preventScroll: true });
@@ -616,12 +628,24 @@ export default function BattleArena(props: Props) {
         pulses.current.delete(code);
         return false;
       };
-      input.gas =
-        Number(held("KeyW") || held("ArrowUp")) -
-        Number(held("KeyS") || held("ArrowDown"));
-      input.steer =
-        Number(held("KeyA") || held("ArrowLeft")) -
-        Number(held("KeyD") || held("ArrowRight"));
+      input.gas = Math.max(
+        -1,
+        Math.min(
+          1,
+          Number(held("KeyW") || held("ArrowUp")) -
+            Number(held("KeyS") || held("ArrowDown")) +
+            touchDrive.current.gas,
+        ),
+      );
+      input.steer = Math.max(
+        -1,
+        Math.min(
+          1,
+          Number(held("KeyA") || held("ArrowLeft")) -
+            Number(held("KeyD") || held("ArrowRight")) +
+            touchDrive.current.steer,
+        ),
+      );
       input.fire = held("KeyF") || held("MouseFire");
       input.action = held("Space");
       input.weapons = systemsRef.current.weapons;
@@ -1146,9 +1170,34 @@ export default function BattleArena(props: Props) {
       presses.current.delete(e.pointerId);
     },
   });
+  const moveJoystick = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (joystickPointer.current !== e.pointerId) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const radius = Math.min(rect.width, rect.height) * 0.36;
+    const dx = e.clientX - (rect.left + rect.width / 2);
+    const dy = e.clientY - (rect.top + rect.height / 2);
+    const length = Math.hypot(dx, dy);
+    const scale = length > radius ? radius / length : 1;
+    const x = dx * scale;
+    const y = dy * scale;
+    if (joystickNub.current)
+      joystickNub.current.style.transform = `translate(${x}px, ${y}px)`;
+    touchDrive.current = {
+      steer: -x / radius,
+      gas: -y / radius,
+    };
+  };
+  const releaseJoystick = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (joystickPointer.current !== e.pointerId) return;
+    joystickPointer.current = null;
+    touchDrive.current = { gas: 0, steer: 0 };
+    if (joystickNub.current)
+      joystickNub.current.style.transform = "translate(0px, 0px)";
+  };
   return (
     <div
       className="battle-screen"
+      data-controls={props.controlMode}
       ref={root}
       tabIndex={-1}
       aria-label="VMD live arena"
@@ -1306,50 +1355,71 @@ export default function BattleArena(props: Props) {
         )}
       </div>
       <div className="battle-bottom">
-        <div className="drive-pad" aria-label="Hold to drive">
-          <button
-            aria-label="Steer left"
-            title="Steer left (A)"
-            data-held={hud.steer > 0}
-            disabled={phase !== "play"}
-            {...hold("KeyA")}
+        {props.controlMode === "mobile" ? (
+          <div
+            className="touch-joystick"
+            aria-label="Driving joystick"
+            role="group"
+            onPointerDown={(e) => {
+              if (phase !== "play" || pauseRef.current) return;
+              e.preventDefault();
+              joystickPointer.current = e.pointerId;
+              e.currentTarget.setPointerCapture(e.pointerId);
+              moveJoystick(e);
+            }}
+            onPointerMove={moveJoystick}
+            onPointerUp={releaseJoystick}
+            onPointerCancel={releaseJoystick}
+            onLostPointerCapture={releaseJoystick}
           >
-            <ArrowLeft />
-            <kbd>A</kbd>
-          </button>
-          <div className="drive-pedals">
+            <i ref={joystickNub} />
+          </div>
+        ) : (
+          <div className="drive-pad" aria-label="Hold to drive">
             <button
-              aria-label="Drive forward"
-              title="Accelerate (W)"
-              data-held={hud.gas > 0}
+              aria-label="Steer left"
+              title="Steer left (A)"
+              data-held={hud.steer > 0}
               disabled={phase !== "play"}
-              {...hold("KeyW")}
+              {...hold("KeyA")}
             >
-              <ArrowUp />
-              <kbd>W</kbd>
+              <ArrowLeft />
+              <kbd>A</kbd>
             </button>
+            <div className="drive-pedals">
+              <button
+                aria-label="Drive forward"
+                title="Accelerate (W)"
+                data-held={hud.gas > 0}
+                disabled={phase !== "play"}
+                {...hold("KeyW")}
+              >
+                <ArrowUp />
+                <kbd>W</kbd>
+              </button>
+              <button
+                aria-label="Reverse"
+                title="Reverse (S)"
+                data-held={hud.gas < 0}
+                disabled={phase !== "play"}
+                {...hold("KeyS")}
+              >
+                <ArrowDown />
+                <kbd>S</kbd>
+              </button>
+            </div>
             <button
-              aria-label="Reverse"
-              title="Reverse (S)"
-              data-held={hud.gas < 0}
+              aria-label="Steer right"
+              title="Steer right (D)"
+              data-held={hud.steer < 0}
               disabled={phase !== "play"}
-              {...hold("KeyS")}
+              {...hold("KeyD")}
             >
-              <ArrowDown />
-              <kbd>S</kbd>
+              <ArrowRight />
+              <kbd>D</kbd>
             </button>
           </div>
-          <button
-            aria-label="Steer right"
-            title="Steer right (D)"
-            data-held={hud.steer < 0}
-            disabled={phase !== "play"}
-            {...hold("KeyD")}
-          >
-            <ArrowRight />
-            <kbd>D</kbd>
-          </button>
-        </div>
+        )}
         <div className="desktop-hint">
           <Keyboard size={17} />
           <span>
@@ -1358,13 +1428,15 @@ export default function BattleArena(props: Props) {
           </span>
         </div>
         <div className="fire-pad">
-          <button
-            className="dark-button"
-            title="Sound horn (H)"
-            onClick={() => sfx("horn", latest.current.livery?.horn ?? "stock")}
-          >
-            <Radio size={15} /> HORN
-          </button>
+          {props.controlMode === "pc" && (
+            <button
+              className="dark-button"
+              title="Sound horn (H)"
+              onClick={() => sfx("horn", latest.current.livery?.horn ?? "stock")}
+            >
+              <Radio size={15} /> HORN
+            </button>
+          )}
           <button
             className="dark-button"
             disabled={phase !== "play"}
@@ -1391,6 +1463,21 @@ export default function BattleArena(props: Props) {
             </div>
             <h2>Match paused</h2>
             <p>Your machine and the match timer are on hold.</p>
+            <button
+              className="dark-button wide"
+              onClick={() =>
+                props.onControlModeChange(
+                  props.controlMode === "pc" ? "mobile" : "pc",
+                )
+              }
+            >
+              {props.controlMode === "pc" ? (
+                <Smartphone size={16} />
+              ) : (
+                <Monitor size={16} />
+              )}
+              Switch to {props.controlMode === "pc" ? "mobile" : "PC"} controls
+            </button>
             <button className="primary wide" onClick={() => pause(false)}>
               <Play size={16} /> Resume match
             </button>
@@ -1402,9 +1489,9 @@ export default function BattleArena(props: Props) {
             </button>
             {controlsOpen && (
               <p className="hint-text">
-                W/S: drive and reverse. A/D: steer. Hold F or the fire button to
-                attack. Space: hop, thrust, lift, or right a tipped vehicle.
-                Drag to orbit and press C to restore the follow camera.
+                {props.controlMode === "mobile"
+                  ? "Drag the joystick to drive and steer. Hold Fire to attack. Action triggers your vehicle's special movement."
+                  : "W/S: drive and reverse. A/D: steer. Hold F or the fire button to attack. Space: hop, thrust, lift, or right a tipped vehicle. Drag to orbit and press C to restore the follow camera."}
               </p>
             )}
             <button className="text-button wide" onClick={props.onExit}>

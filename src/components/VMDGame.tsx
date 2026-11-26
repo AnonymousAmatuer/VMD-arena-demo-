@@ -27,12 +27,14 @@ import {
   LayoutGrid,
   Medal,
   Menu,
+  Monitor,
   PackageCheck,
   Play,
   Radio,
   Settings,
   ShieldCheck,
   Star,
+  Smartphone,
   Trophy,
   UserRound,
   Volume2,
@@ -72,6 +74,7 @@ import {
   setMusicScene,
 } from "@/game/audio";
 import type { Outcome } from "@/game/simulation";
+import { CONTROL_MODE_KEY, type ControlMode } from "@/game/controls";
 const Battle = dynamic(() => import("./BattleArena"), {
   ssr: false,
   loading: () => (
@@ -105,6 +108,9 @@ export default function VMDGame() {
     [lab, setLab] = useState(false),
     [round, setRound] = useState(1),
     [fighting, setFighting] = useState(false),
+    [controlMode, setControlMode] = useState<ControlMode>("pc"),
+    [controlsReady, setControlsReady] = useState(false),
+    [controlModeChosen, setControlModeChosen] = useState(false),
     [toast, setToast] = useState(""),
     [pilotName, setPilotName] = useState("Pip"),
     [result, setResult] = useState<
@@ -118,6 +124,23 @@ export default function VMDGame() {
     >(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null),
     resolved = useRef(false);
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(CONTROL_MODE_KEY);
+      if (saved === "pc" || saved === "mobile") {
+        setControlMode(saved);
+        setControlModeChosen(true);
+      }
+    } catch {}
+    setControlsReady(true);
+  }, []);
+  function chooseControlMode(mode: ControlMode) {
+    setControlMode(mode);
+    setControlModeChosen(true);
+    try {
+      localStorage.setItem(CONTROL_MODE_KEY, mode);
+    } catch {}
+  }
   useEffect(() => configureAudio(profile.settings), [profile.settings]);
   useEffect(
     () => setMusicScene(fighting || versusOpen ? "battle" : "menu"),
@@ -273,6 +296,8 @@ export default function VMDGame() {
         level={round}
         engineer={profile.engineer}
         settings={profile.settings}
+        controlMode={controlMode}
+        onControlModeChange={chooseControlMode}
         onFinish={finish}
         onExit={() => {
           setFighting(false);
@@ -696,6 +721,41 @@ export default function VMDGame() {
           profile={profile}
           onClose={() => setModal(null)}
         />
+      )}
+      {controlsReady && !controlModeChosen && (
+        <Dialog
+          title="Choose your controls"
+          kicker="WELCOME TO VMD ARENA"
+          onClose={() => {}}
+          className="control-onboarding"
+        >
+          <h2>How are you playing?</h2>
+          <p>
+            Choose the controls that fit your device. You can change this later.
+          </p>
+          <div className="control-choice-grid">
+            <button
+              className="dark-button"
+              onClick={() => chooseControlMode("pc")}
+            >
+              <Monitor size={19} />
+              <span>
+                <b>PC</b>
+                <small>Keyboard and mouse</small>
+              </span>
+            </button>
+            <button
+              className="primary"
+              onClick={() => chooseControlMode("mobile")}
+            >
+              <Smartphone size={19} />
+              <span>
+                <b>Mobile</b>
+                <small>Touch joystick and buttons</small>
+              </span>
+            </button>
+          </div>
+        </Dialog>
       )}
     </div>
   );
