@@ -1,0 +1,28 @@
+# Dependencies and Next.js output
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Local caches and generated TypeScript state
+.npm-cache/
+.telemetry-cache/
+.upgrade-tmp/
+*.tsbuildinfo
+
+# Local saves, test output, and generated artifacts
+public.vmd_engineer_saves.csv
+artifacts/
+playwright-report/
+test-results/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/

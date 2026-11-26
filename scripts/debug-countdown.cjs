@@ -1,0 +1,5 @@
+const {chromium}=require('@playwright/test');
+(async()=>{const b=await chromium.launch({args:['--no-sandbox','--enable-unsafe-swiftshader','--use-angle=swiftshader']});const p=await b.newPage({viewport:{width:1280,height:800}});p.on('pageerror',e=>console.log('ERR',e.message));
+await p.goto('http://localhost:3000',{waitUntil:'networkidle'});await p.waitForTimeout(1000);await p.keyboard.press('Escape');await p.getByRole('button',{name:'Enter arena',exact:true}).click();await p.waitForTimeout(1000);await p.locator('.versus-skip').click({timeout:4000}).catch(()=>{});await p.locator('.arena-canvas canvas').waitFor({timeout:30000});await p.locator('.intro-skip').click();
+for(let i=0;i<12;i++){await p.waitForTimeout(500);const info=await p.evaluate(()=>({numeral:document.querySelector('.countdown-numeral b')?.textContent??null,disabled:document.querySelector('.drive-pad button[aria-label="Drive forward"]')?.disabled??null,bars:document.querySelectorAll('.cinema-bar').length,time:document.querySelector('.round-timer strong')?.textContent}));console.log(i,info)}
+await b.close()})().catch(e=>{console.error(e.message.slice(0,200));process.exit(1)})
