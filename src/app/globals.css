@@ -5435,6 +5435,20 @@ body:has(.failure-flash.active) .slowmo-label {
 .cinema-titles {
   max-width: min(760px, 64vw);
 }
+.ps-demo-label {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 7px 11px;
+  border: 1px solid rgba(255, 157, 92, 0.65);
+  background: rgba(16, 19, 20, 0.82);
+  color: #ffd0a9;
+  font: 700 11px var(--mono);
+  letter-spacing: 2.5px;
+  text-shadow: 0 0 14px rgba(255, 138, 61, 0.45);
+  opacity: 0;
+  animation: title-line 0.8s 0.2s ease-out forwards;
+}
 .cinema-kicker {
   display: block;
   font: 600 11px var(--mono);

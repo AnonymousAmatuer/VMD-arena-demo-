@@ -557,6 +557,7 @@ export default function CinemaSplash({
 
       <div className={`cinema-hud ps-hud ${revealed ? "shown" : ""}`}>
         <div className="cinema-titles ps-titles">
+          <span className="ps-demo-label">THIS IS A DEMO</span>
           <span className="cinema-kicker ps-kicker">
             THE PLATYPUS 3D ENGINEER
           </span>
