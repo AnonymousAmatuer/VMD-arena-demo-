@@ -1,5 +1,10 @@
 # VMD Championship — The Platypus 3D Engineer
 
+
+
+#  *NOTE: THIS IS A DEMO*
+
+
 A playable, single-player vehicle engineering game built with Next.js App Router, Three.js, Cannon-es, PostgreSQL, and Drizzle ORM. Original cinematic artwork introduces the factory machine; editing, driving, projectiles, and destruction run in a real-time 3D simulation.
 
 ## Play
