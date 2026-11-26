@@ -1,5 +1,10 @@
 # VMD Championship — The Platypus 3D Engineer
 
+
+
+#  *NOTE: THIS IS A DEMO*
+
+
 A playable, single-player vehicle engineering game built with Next.js App Router, Three.js, Cannon-es, PostgreSQL, and Drizzle ORM. Original cinematic artwork introduces the factory machine; editing, driving, projectiles, and destruction run in a real-time 3D simulation.
 
 ## Play
@@ -67,45 +72,3 @@ The current profile is saved to `localStorage` under `vmd.engineer.v1`. A random
 
 Database configuration uses `DATABASE_URL` from `.env.local` and `src/db/index.ts`. Drizzle uses that same URL through `drizzle.config.ts`; the `vmd_engineer_saves` table is defined in `src/db/schema.ts`. Run `npx drizzle-kit push` to create the table in the configured database.
 
-## GitHub and deployment
-
-This is a Next.js server app: GitHub can hold the source code, but GitHub Pages cannot run its PostgreSQL-backed `/api/save` route. To publish the playable site, connect this repository to a Next.js hosting service such as Vercel and add a PostgreSQL database.
-
-1. Copy `.env.example` to `.env.local` and set `DATABASE_URL` to your PostgreSQL connection string for local development. Never commit `.env.local` or post the connection string publicly.
-2. Create a GitHub repository, then from this project folder run:
-
-   ```sh
-   git add .
-   git commit -m "Prepare VMD Arena for GitHub"
-   git branch -M main
-   git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
-   git push -u origin main
-   ```
-
-3. Import the repository into your hosting provider and add `DATABASE_URL` in its environment settings. Apply the Drizzle schema to that database with `npx drizzle-kit push` before relying on cloud saves. Do not put database credentials in source files or GitHub Actions logs.
-
-The `.gitignore` keeps dependencies, build output, local environment files, generated verification artifacts, and the local saves CSV out of Git. Public assets in `public/` and the game source are included normally.
-
-## Verification
-
-```sh
-npx next typegen
-npm exec tsc -- --noEmit --pretty false
-npm run build
-node scripts/verify-engine.cjs
-node scripts/verify-drivetrain.cjs
-node scripts/verify-failure.cjs
-node scripts/verify-campaign.cjs
-```
-
-With the production preview running on port 3000:
-
-```sh
-npx playwright install --with-deps chromium
-node scripts/verify-browser.cjs
-node scripts/verify-touch.cjs
-node scripts/verify-replay-mp4.cjs
-node scripts/verify-drag-drive.cjs
-```
-
-Browser tests use isolated device profiles. They exercise live placement, invalid mounts, salvage enforcement, undo/redo, save/load, tournament locks, keyboard and touch gameplay, match rewards, PostgreSQL recovery, and confirmed reset. Screenshots from the desktop suite are written to `artifacts/`.
